@@ -16,7 +16,7 @@
       <v-list class="pt-0" dense>
         <v-divider></v-divider>
 
-        <v-list-tile v-for="item in items" :key="item.title" @click>
+        <v-list-tile v-for="item in items" :key="item.title" @click="navigate(item.to)">
           <v-list-tile-action>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-tile-action>
@@ -32,7 +32,7 @@
       <v-toolbar-title>loverage</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">
-        <v-btn flat>
+        <v-btn flat @click="navigate('post-form')">
         <v-avatar :size="25" color="grey lighten-5">
           <img src="./assets/post_message.png" alt="avatar">
         </v-avatar>
@@ -66,7 +66,6 @@
         <router-view></router-view>
       </v-container>
     </v-content>
-    <v-footer app></v-footer>
   </v-app>
 </template>
 
@@ -74,14 +73,19 @@
 export default {
   name: "App",
   components: {},
+  methods:{
+    navigate: function(name){
+      this.$router.push({ name: name })
+    }
+  },
   data() {
     return {
       drawer: null,
       items: [
-        { title: "All Aricles", icon: "all_inbox" },
-        { title: "Featured", icon: "stars" },
-        { title: "HotTopic", icon: "loyalty" },
-        { title: "Editors Pick", icon: "favorite" }
+        { title: "All Aricles", icon: "all_inbox", to: 'home' },
+        { title: "Featured", icon: "stars", to: 'featured' },
+        { title: "HotTopic", icon: "loyalty", to: "hottopic" },
+        { title: "Editors Pick", icon: "favorite", to: "editors_pick" }
       ]
     };
   }
