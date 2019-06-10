@@ -1,5 +1,10 @@
 <template>
   <div>
+    <p>
+      <span><v-icon :size="15">all_inbox</v-icon></span>
+      <span style="font-weight: bold;"> All Articles</span>
+      <span v-if="posts.length != 0"> 　総投稿数：{{ posts.length - 1 }} 件</span>
+    </p>
     <v-data-table
       :headers="headers"
       :items="posts"
@@ -11,27 +16,49 @@
       <template v-slot:items="props">
         <td class="text-xs-right">{{ props.item.id }}</td>
         <td class="text-xs-left">{{ props.item.updated_at|format_date }}</td>
+        <td class="text-xs-left">{{ props.item.created_at|format_date }}</td>
         <td class="text-xs-left">{{ props.item.content }}</td>
         <td class="text-xs-right">{{ props.item.ref_count }}</td>
         <td class="text-xs-right">{{ props.item.votes_amount }}</td>
-        <td class="text-xs-right">{{ props.item.user_sex|translate_to_jp_sex }}</td>
-        <td class="text-xs-right">{{ props.item.user_age|translate_to_jp_age }}</td>
-        <td class="text-xs-left">{{ props.item.created_at|format_date }}</td>
-        <td class="justify-center layout px-0">
+        <td class="text-xs-center">{{ props.item.user_sex|translate_to_jp_sex }}</td>
+        <td class="text-xs-center">{{ props.item.user_age|translate_to_jp_age }}</td>
+        <td class="text-xs-center">
           <v-icon
-            :size="30"
-            class="mr-2"
+            :size="25"
+            class="mr-3"
+            v-bind:style="[isMatchFeatureds(props.item.id)?{ 'color': 'yellow' }:{ '': ''}]"
+            @click="navigate({ name: 'article', params: { id: props.item.id } })"
+          >stars</v-icon>
+          <v-icon
+            :size="25"
+            class="mr-3"
+            v-bind:style="[isMatchHotTopics(props.item.id)?{ 'color': 'yellow' }:{ '': ''}]"
+            @click="navigate({ name: 'edit-form', params: { id: props.item.id } })"
+          >whatshot</v-icon>
+          <v-icon
+            :size="25"
+            v-bind:style="[isMatchEditorsPicks(props.item.id)?{ 'color': 'yellow' }:{ '': ''}]"
+            @click="deleteItem(props.item)"
+          >favorite</v-icon>
+        </td>
+        <td class="text-xs-center">
+          <v-icon
+            :size="25"
+            class="mr-3"
             @click="navigate({ name: 'article', params: { id: props.item.id } })"
           >description</v-icon>
           <v-icon
-            :size="30"
-            class="mr-2"
+            :size="25"
+            class="mr-3"
             @click="navigate({ name: 'edit-form', params: { id: props.item.id } })"
           >edit</v-icon>
-          <v-icon :size="30" @click="deleteItem(props.item)">delete</v-icon>
+          <v-icon
+            :size="25"
+            @click="deleteItem(props.item)"
+          >delete</v-icon>
         </td>
-        <td class="justify-center">
-          <v-icon :size="30" @click="deleteItem(props.item)">visibility</v-icon>
+        <td class="text-xs-center">
+          <v-icon :size="25" @click="deleteItem(props.item)">visibility</v-icon>
           <!-- <v-icon class="mr-1" @click="deleteItem(props.item)">visibility_off</v-icon> -->
         </td>
       </template>
@@ -105,80 +132,92 @@ export default {
       dialog: false,
       search: "",
       pagination: {
-        rowsPerPage: 10,
+        rowsPerPage: 14,
         descending: true,
         sortBy: "updated_at",
         totalItems: 20
       },
       headers: [
         {
-          text: "id",
+          text: "ID",
           value: "id",
           align: "center",
           sortable: false
         },
         {
-          text: "updated_at",
+          text: "更新日時",
           value: "updated_at",
           align: "center",
           sortable: true
         },
         {
-          text: "title",
+          text: "投稿日時",
+          value: "created_at",
+          align: "center",
+          sortable: true
+        },
+        {
+          text: "投稿内容",
           align: "left",
           sortable: false,
           value: "content",
           width: "450"
         },
         {
-          text: "view",
+          text: "閲覧数",
           align: "center",
           value: "ref_count",
           sortable: true,
-          width: "30"
+          width: "10",
+          sortable: true
         },
         {
-          text: "vote",
+          text: "投票数",
           align: "center",
           value: "votes_amount",
           sortable: true,
-          width: "30"
+          width: "10",
+          sortable: true
         },
         {
-          text: "gender",
+          text: "性別",
           value: "user_sex",
           align: "center",
           sortable: false,
-          width: "30"
+          width: "80"
         },
         {
-          text: "age",
+          text: "年代",
           value: "user_age",
           align: "center",
           sortable: false,
           width: "150"
         },
         {
-          text: "created_at",
-          value: "created_at",
-          align: "center",
-          sortable: true
-        },
-        {
-          text: "actions",
+          text: "グループ",
           align: "center",
           value: "name",
           sortable: false,
-          width: "200"
+          width: "180"
         },
         {
-          text: "visible",
+          text: "閲覧/編集/削除",
+          align: "center",
+          value: "name",
+          sortable: false,
+          width: "180"
+        },
+        {
+          text: "表示/非表示",
           align: "center",
           value: "name2",
           sortable: false
         }
       ],
-      posts: []
+      posts: [],
+      featureds: [],
+      hot_topics: [],
+      editors_picks: []
     };
   },
   computed: {
@@ -195,19 +234,44 @@ export default {
     }
   },
   created() {
+    store.get_ajax_articles("featureds?limit=100000", "featureds");
+    store.$on("GET_AJAX_COMPLETE_FEATUREDS", () => {
+      this.featureds = store.getFeatureds();
+    });
+    store.get_ajax_articles("hot_topics?limit=100000", "hot_topics");
+    store.$on("GET_AJAX_COMPLETE_HOT_TOPICS", () => {
+      this.hot_topics = store.getHotTopics();
+    });
+    store.get_ajax_articles("editors_picks?limit=100000", "editors_picks");
+    store.$on("GET_AJAX_COMPLETE_EDITORS_PICKS", () => {
+      this.editors_picks = store.getEditorsPicks();
+    });
     // Json取得
-    store.get_ajax_articles("articles?limit=100", "posts");
+    store.get_ajax_articles("articles?limit=100000", "posts");
     // Json取得後に呼び出される
-    store.$on("GET_AJAX_COMPLETE", () => {
-      // this.desserts = store.get_data('search_list');
-      this.posts = store.get_data("posts");
+    store.$on("GET_AJAX_COMPLETE_POSTS", () => {
+      this.posts = store.getPosts();
       this.pagination.totalItems = this.posts.length - 1;
     });
+
   },
   methods: {
     navigate: function(to) {
       this.$router.push(to);
+    },
+    isMatchFeatureds(id) {
+      const target = store.featureds.find((p) => {return (p.id == id)});
+      return (target !== undefined) 
+    },
+    isMatchHotTopics(id) {
+      const target = store.hot_topics.find((p) => {return (p.id == id)});
+      return (target !== undefined) 
+    },
+    isMatchEditorsPicks(id) {
+      const target = store.editors_picks.find((p) => {return (p.id == id)});
+      return (target !== undefined) 
     }
+    
   }
 };
 </script>

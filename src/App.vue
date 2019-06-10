@@ -84,7 +84,7 @@ export default {
       items: [
         { title: "All Aricles", icon: "all_inbox", to: 'home' },
         { title: "Featured", icon: "stars", to: 'featured' },
-        { title: "HotTopic", icon: "loyalty", to: "hottopic" },
+        { title: "HotTopic", icon: "whatshot", to: "hottopic" },
         { title: "Editors Pick", icon: "favorite", to: "editors_pick" }
       ]
     };

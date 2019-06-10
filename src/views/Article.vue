@@ -24,8 +24,8 @@ export default {
     // Json取得
     store.get_ajax_article(`articles/${ id }`, "post");
     // Json取得後に呼び出される
-    store.$on("GET_AJAX_COMPLETE", () => {
-      this.post = store.get_data("post");
+    store.$on("GET_AJAX_COMPLETE_POST", () => {
+      this.post = store.getPost();
       console.log(this.post)
     });
   },
