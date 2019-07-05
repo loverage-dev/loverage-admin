@@ -3,7 +3,7 @@
     <p>
       <span><v-icon :size="15">stars</v-icon></span>
       <span style="font-weight: bold;"> Featured</span>
-      <span v-if="featureds.length != 0"> 　登録数：{{ featureds.length - 1 }} 件</span>
+      <span v-if="featureds.length != 0"> 　登録数：{{ featureds.length }} 件</span>
     </p>
     <v-data-table
       :headers="headers"
@@ -40,7 +40,7 @@
           <v-icon
             :size="25"
             class="mr-3"
-            @click="removeArticle(props.item.id)"
+            @click="removeArticle(props.item.origin_id)"
           >remove_circle</v-icon>
         </td>
       </template>
@@ -174,10 +174,28 @@ export default {
       this.$router.push(to);
     },
     upArticle: function(id) {
-      console.log("Up:" + id)
+      store.post_ajax_articles("articles/up_to_pickup", { id: id })
+      .then((res)=>{
+        if(res.status == 200){
+          store.get_ajax_articles("featureds?limit=100000", "featureds");
+          store.$on("GET_AJAX_COMPLETE_FEATUREDS", () => {
+          this.featureds = store.getFeatureds();
+          this.pagination.totalItems = this.featureds.length - 1;
+          });
+        } 
+      })
     },
     removeArticle: function(id){
-      console.log("Remove:" + id)
+      store.delete_ajax_article("articles/featured/", id)
+      .then((res)=>{
+        if(res.status == 200){
+            store.get_ajax_articles("featureds?limit=100000", "featureds");
+            store.$on("GET_AJAX_COMPLETE_FEATUREDS", () => {
+            this.featureds = store.getFeatureds();
+            this.pagination.totalItems = this.featureds.length - 1;
+          })
+        }
+      })
     }
   }
 };
