@@ -3,7 +3,7 @@
     <p>
       <span><v-icon :size="15">all_inbox</v-icon></span>
       <span style="font-weight: bold;"> All Articles</span>
-      <span v-if="posts.length != 0"> 　総投稿数：{{ posts.length - 1 }} 件</span>
+      <span v-if="posts.length != 0"> 　総投稿数：{{ posts.length }} 件</span>
     </p>
     <v-data-table
       :headers="headers"
@@ -27,18 +27,18 @@
             :size="25"
             class="mr-3"
             v-bind:style="[isMatchFeatureds(props.item.id)?{ 'color': 'yellow' }:{ '': ''}]"
-            @click="navigate({ name: 'article', params: { id: props.item.id } })"
+            @click="switchFeatured(isMatchFeatureds(props.item.id),props.item.id)"
           >stars</v-icon>
           <v-icon
             :size="25"
             class="mr-3"
             v-bind:style="[isMatchHotTopics(props.item.id)?{ 'color': 'yellow' }:{ '': ''}]"
-            @click="navigate({ name: 'edit-form', params: { id: props.item.id } })"
+            @click="switchHotTopics(isMatchHotTopics(props.item.id),props.item.id)"
           >whatshot</v-icon>
           <v-icon
             :size="25"
             v-bind:style="[isMatchEditorsPicks(props.item.id)?{ 'color': 'yellow' }:{ '': ''}]"
-            @click="deleteItem(props.item)"
+            @click="switchEditorsPick(isMatchHotTopics(props.item.id),props.item.id)"
           >favorite</v-icon>
         </td>
         <td class="text-xs-center">
@@ -246,19 +246,9 @@ export default {
     store.$on("GET_AJAX_COMPLETE_EDITORS_PICKS", () => {
       this.editors_picks = store.getEditorsPicks();
     });
-    // Json取得
-    store.get_ajax_articles("articles?limit=100000", "posts");
-    // Json取得後に呼び出される
-    store.$on("GET_AJAX_COMPLETE_POSTS", () => {
-      this.posts = store.getPosts();
-      this.pagination.totalItems = this.posts.length - 1;
-    });
-
+    this.getArticles();
   },
   methods: {
-    navigate: function(to) {
-      this.$router.push(to);
-    },
     isMatchFeatureds(id) {
       const target = store.featureds.find((p) => {return (p.id == id)});
       return (target !== undefined) 
@@ -270,8 +260,147 @@ export default {
     isMatchEditorsPicks(id) {
       const target = store.editors_picks.find((p) => {return (p.id == id)});
       return (target !== undefined) 
+    },
+    getFeaturedId(postId){
+      let target = store.featureds.find((p) => {return (p.id == postId)});
+      return target.origin_id
+    },
+    getHotTopicId(postId){
+      let target = store.hot_topics.find((p) => {return (p.id == postId)});
+      return target.origin_id
+    },
+    getEditorsPickId(postId){
+      let target = store.editors_picks.find((p) => {return (p.id == postId)});
+      return target.origin_id
+    },
+    navigate: function(to) {
+      this.$router.push(to);
+    },
+    getArticles: function(){
+      store.get_ajax_articles("articles?limit=100000", "posts");
+        // Json取得後に呼び出される
+        store.$on("GET_AJAX_COMPLETE_POSTS", () => {
+          this.posts = store.getPosts();
+          this.pagination.totalItems = this.posts.length - 1;
+        });
+    },
+    switchFeatured(registarFlag, id){
+      if(registarFlag){
+        let featuredId = this.getFeaturedId(id);
+        this.removeFromFeatured(featuredId);
+      }else{
+        this.registerToFeatured(id);
+      }
+    },
+    switchHotTopics(registarFlag, id){
+      if(registarFlag){
+        let hotTopicId = this.getHotTopicId(id);
+        this.removeFromHotTopic(hotTopicId);
+      }else{
+        this.registerToHotTopic(id);
+      }
+    },
+    switchEditorsPick(registarFlag, id){
+      if(registarFlag){
+        let editorsPickId = this.getEditorsPickId(id);
+        this.removeFromEditorsPick(editorsPickId);
+      }else{
+        this.registerToEditorsPick(id);
+      }
+    },
+    registerToFeatured(id){
+      store.post_ajax_articles("articles/featured", 
+        {	
+          "featured" : {
+		        "post_id" : id,
+            "keyword" : ""
+          } 
+        }
+      )
+      .then((res)=>{
+        if(res.status == 201){
+          store.get_ajax_articles("featureds?limit=100000", "featureds");
+          store.$on("GET_AJAX_COMPLETE_FEATUREDS", () => {
+            this.featureds = store.getFeatureds();
+            this.getArticles();
+          });
+        } 
+      })
+    },
+    removeFromFeatured(id){
+      store.delete_ajax_article("articles/featured/", id)
+      .then((res)=>{
+        if(res.status == 200){
+            store.get_ajax_articles("featureds?limit=100000", "featureds");
+            store.$on("GET_AJAX_COMPLETE_FEATUREDS", () => {
+            this.featureds = store.getFeatureds();
+            this.getArticles();
+          })
+        }
+      })
+    },
+    registerToHotTopic(id){
+      store.post_ajax_articles("articles/hot_topic", 
+        {	
+          "hot_topic" : {
+		        "post_id" : id,
+            "keyword" : ""
+          } 
+        }
+      )
+      .then((res)=>{
+        if(res.status == 201){
+          store.get_ajax_articles("hot_topics?limit=100000", "hot_topics");
+          store.$on("GET_AJAX_COMPLETE_HOT_TOPICS", () => {
+            this.hot_topics = store.getHotTopics();
+            this.getArticles();
+          });
+        } 
+      })
+    },
+    removeFromHotTopic(id){
+      store.delete_ajax_article("articles/hot_topic/", id)
+      .then((res)=>{
+        if(res.status == 200){
+            store.get_ajax_articles("hot_topics?limit=100000", "hot_topics");
+            store.$on("GET_AJAX_COMPLETE_HOT_TOPICS", () => {
+            this.hot_topics = store.getHotTopics();
+            this.getArticles();
+          })
+        }
+      })
+    },
+    registerToEditorsPick(id){
+      store.post_ajax_articles("articles/editors_pick", 
+        {	
+          "editors_pick" : {
+		        "post_id" : id,
+            "keyword" : ""
+          } 
+        }
+      )
+      .then((res)=>{
+        if(res.status == 201){
+          store.get_ajax_articles("editors_picks?limit=100000", "editors_picks");
+          store.$on("GET_AJAX_COMPLETE_EDITORS_PICKS", () => {
+            this.editors_picks = store.getEditorsPicks();
+            this.getArticles();
+          });
+        } 
+      })
+    },
+    removeFromEditorsPick(id){
+      store.delete_ajax_article("articles/editors_pick/", id)
+      .then((res)=>{
+        if(res.status == 200){
+            store.get_ajax_articles("editors_picks?limit=100000", "editors_picks");
+            store.$on("GET_AJAX_COMPLETE_EDITORS_PICKS", () => {
+            this.editors_picks = store.getEditorsPicks();
+            this.getArticles();
+          })
+        }
+      })
     }
-    
   }
 };
 </script>
