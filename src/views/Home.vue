@@ -14,9 +14,9 @@
       :pagination.sync="pagination"
     >
       <template v-slot:items="props">
-        <td class="text-xs-right">{{ props.item.id }}</td>
-        <td class="text-xs-left">{{ props.item.updated_at|format_date }}</td>
-        <td class="text-xs-left">{{ props.item.created_at|format_date }}</td>
+        <td class="text-xs-center">{{ props.item.id }}</td>
+        <td class="text-xs-center">{{ props.item.updated_at|format_date }}</td>
+        <td class="text-xs-center">{{ props.item.created_at|format_date }}</td>
         <td class="text-xs-left">{{ props.item.content }}</td>
         <td class="text-xs-right">{{ props.item.ref_count }}</td>
         <td class="text-xs-right">{{ props.item.votes_amount }}</td>
@@ -57,15 +57,15 @@
             @click="deleteItem(props.item)"
           >delete</v-icon>
         </td>
-        <td class="text-xs-center">
+        <!-- <td class="text-xs-center">
           <v-icon :size="25" @click="deleteItem(props.item)">visibility</v-icon>
-          <!-- <v-icon class="mr-1" @click="deleteItem(props.item)">visibility_off</v-icon> -->
-        </td>
+        </td> -->
       </template>
     </v-data-table>
     <div class="text-xs-center pt-2">
       <v-pagination v-model="pagination.page" :length="pages"></v-pagination>
     </div>
+    <!-- ダイアログ -->
     <v-dialog v-model="dialog" persistent max-width="600px">
       <template v-slot:activator="{ on }">
         <v-btn large fab dark color="primary" v-on="on" class="back">
@@ -142,26 +142,28 @@ export default {
           text: "ID",
           value: "id",
           align: "center",
-          sortable: false
+          sortable: false,
+          width: "10"
         },
         {
           text: "更新日時",
           value: "updated_at",
           align: "center",
-          sortable: true
+          sortable: true,
+          width: "140"
         },
         {
           text: "投稿日時",
           value: "created_at",
           align: "center",
-          sortable: true
+          sortable: true,
+          width: "140"
         },
         {
           text: "投稿内容",
           align: "left",
           sortable: false,
-          value: "content",
-          width: "450"
+          value: "content"
         },
         {
           text: "閲覧数",
@@ -191,7 +193,7 @@ export default {
           value: "user_age",
           align: "center",
           sortable: false,
-          width: "150"
+          width: "110"
         },
         {
           text: "グループ",
@@ -206,13 +208,14 @@ export default {
           value: "name",
           sortable: false,
           width: "180"
-        },
-        {
-          text: "表示/非表示",
-          align: "center",
-          value: "name2",
-          sortable: false
         }
+        // ,
+        // {
+        //   text: "表示/非表示",
+        //   align: "center",
+        //   value: "name2",
+        //   sortable: false
+        // }
       ],
       posts: [],
       featureds: [],
