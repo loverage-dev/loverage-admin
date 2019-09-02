@@ -38,7 +38,7 @@ export default new Router({
       component: () => import(/* webpackChunkName: "about" */ './views/EditorsPick.vue')
     },
     {
-      path: '/article',
+      path: '/article/:id',
       name: 'article',
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
@@ -54,12 +54,12 @@ export default new Router({
       component: () => import(/* webpackChunkName: "about" */ './views/PostForm.vue')
     },
     {
-      path: '/edit-form',
-      name: 'edit-form',
+      path: '/pickup',
+      name: 'pickup',
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/EditForm.vue')
+      component: () => import(/* webpackChunkName: "about" */ './views/Pickup.vue')
     }
   ]
 })

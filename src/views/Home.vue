@@ -26,6 +26,13 @@
           <v-icon
             :size="25"
             class="mr-3"
+            @click="upArticle(props.item.id)"
+          >arrow_upward</v-icon>
+        </td>
+        <td class="text-xs-center">
+          <v-icon
+            :size="25"
+            class="mr-3"
             v-bind:style="[isMatchFeatureds(props.item.id)?{ 'color': 'yellow' }:{ '': ''}]"
             @click="switchFeatured(isMatchFeatureds(props.item.id),props.item.id)"
           >stars</v-icon>
@@ -47,15 +54,6 @@
             class="mr-3"
             @click="navigate({ name: 'article', params: { id: props.item.id } })"
           >description</v-icon>
-          <v-icon
-            :size="25"
-            class="mr-3"
-            @click="navigate({ name: 'edit-form', params: { id: props.item.id } })"
-          >edit</v-icon>
-          <v-icon
-            :size="25"
-            @click="deleteItem(props.item)"
-          >delete</v-icon>
         </td>
         <!-- <td class="text-xs-center">
           <v-icon :size="25" @click="deleteItem(props.item)">visibility</v-icon>
@@ -74,7 +72,7 @@
       </template>
       <v-card>
         <v-card-title>
-          <span class="headline">User Profile</span>
+          <span class="headline">条件付き検索</span>
         </v-card-title>
         <v-card-text>
           <v-container grid-list-md>
@@ -115,8 +113,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" flat @click="dialog = false">Close</v-btn>
-          <v-btn color="blue darken-1" flat @click="dialog = false">Save</v-btn>
+          <v-btn color="blue darken-1" flat @click="dialog = false">閉じる</v-btn>
+          <v-btn color="blue darken-1" flat @click="dialog = false">検索</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -196,6 +194,12 @@ export default {
           width: "110"
         },
         {
+          text: "アゲ",
+          align: "center",
+          sortable: false,
+          width: "30"
+        },
+        {
           text: "グループ",
           align: "center",
           value: "name",
@@ -203,11 +207,11 @@ export default {
           width: "180"
         },
         {
-          text: "閲覧/編集/削除",
+          text: "記事詳細",
           align: "center",
           value: "name",
           sortable: false,
-          width: "180"
+          width: "50"
         }
         // ,
         // {
@@ -286,6 +290,14 @@ export default {
           this.posts = store.getPosts();
           this.pagination.totalItems = this.posts.length - 1;
         });
+    },
+    upArticle: function(id) {
+      store.post_ajax_articles("articles/up_to_pickup", { id: id })
+      .then((res)=>{
+        if(res.status == 200){
+          this.getArticles();
+        } 
+      })
     },
     switchFeatured(registarFlag, id){
       if(registarFlag){

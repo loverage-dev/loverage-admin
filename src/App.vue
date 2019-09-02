@@ -31,14 +31,6 @@
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>loverage</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-toolbar-items class="hidden-sm-and-down">
-        <v-btn flat @click="navigate('post-form')">
-        <v-avatar :size="25" color="grey lighten-5">
-          <img src="./assets/post_message.png" alt="avatar">
-        </v-avatar>
-          　Post Article
-        </v-btn>
-      </v-toolbar-items>
       <v-toolbar-items class="hidden-md-and-up">
         <v-btn flat>
           <v-avatar :size="40" color="grey lighten-5">
@@ -85,7 +77,8 @@ export default {
         { title: "All Aricles", icon: "all_inbox", to: 'home' },
         { title: "Featured", icon: "stars", to: 'featured' },
         { title: "HotTopic", icon: "whatshot", to: "hottopic" },
-        { title: "Editors Pick", icon: "favorite", to: "editors_pick" }
+        { title: "Editors Pick", icon: "favorite", to: "editors_pick" },
+        { title: "Pickups", icon: "today", to: "pickup" }
       ]
     };
   }

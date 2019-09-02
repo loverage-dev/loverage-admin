@@ -13,6 +13,7 @@ export default new Vue({
     featureds: [],
     hot_topics: [],
     editors_picks: [],
+    visuals: [],
     post: null
   },
   methods: {
@@ -34,6 +35,9 @@ export default new Vue({
             break;
           case 'editors_picks':
               this.$emit('GET_AJAX_COMPLETE_EDITORS_PICKS');
+            break;
+          case 'visuals':
+              this.$emit('GET_AJAX_COMPLETE_VISUALS');
             break;
         }
       });
@@ -66,6 +70,9 @@ export default new Vue({
     },
     getEditorsPicks() {
       return this.editors_picks;
+    },
+    getVisuals() {
+      return this.visuals;
     }
   }
 });
