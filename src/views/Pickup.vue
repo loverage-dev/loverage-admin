@@ -135,10 +135,10 @@ export default{
       let jpType = ""
       switch(type){
         case "main":
-          jpType = "key"
+          jpType = "Key-Visual"
           break;
         case "sub":
-          jpType = "sub"
+          jpType = "Sub-Visual"
           break;
       }
       return jpType

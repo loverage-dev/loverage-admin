@@ -3,7 +3,14 @@
     <p>
       <span><v-icon :size="15">all_inbox</v-icon></span>
       <span style="font-weight: bold;"> All Articles</span>
-      <span v-if="posts.length != 0"> 　総投稿数：{{ posts.length }} 件</span>
+      <span v-if="posts.length != 0 && tmpConditions == null"> 　総投稿数：{{ posts.length }} 件</span>
+      <span v-if="posts.length != 0 && tmpConditions != null"> 　Hit投稿数：{{ posts.length }} 件  
+        <span v-if="tmpConditions.keyword != ''">　[キーワード]{{ this.tmpConditions.keyword }}　</span>
+        <span v-if="tmpConditions.hashTag != ''">　[ハッシュタグ]{{ this.tmpConditions.hashTag }}　</span>
+        <span v-if="tmpConditions.sex != ''">　[性別]{{ this.tmpConditions.sex }}　</span>
+        <span v-if="tmpConditions.age != ''">　[年齢]{{ this.tmpConditions.age }}　</span> 
+      </span>
+      <v-btn v-if="tmpConditions != null" @click="resetConditions()">条件リセット</v-btn>
     </p>
     <v-data-table
       :headers="headers"
@@ -75,46 +82,36 @@
           <span class="headline">条件付き検索</span>
         </v-card-title>
         <v-card-text>
+          <div>検索に追加する条件を入力してください（複数条件指定可）</div>
           <v-container grid-list-md>
             <v-layout wrap>
-              <v-flex xs12 sm6 md4>
-                <v-text-field label="Legal first name*" required></v-text-field>
-              </v-flex>
-              <v-flex xs12 sm6 md4>
-                <v-text-field label="Legal middle name" hint="example of helper text only on focus"></v-text-field>
-              </v-flex>
-              <v-flex xs12 sm6 md4>
-                <v-text-field
-                  label="Legal last name*"
-                  hint="example of persistent helper text"
-                  persistent-hint
-                  required
-                ></v-text-field>
+              <v-flex xs12>
+                <v-text-field v-model="conditions.keyword" label="検索ワード" hint="入力例）大学生"></v-text-field>
               </v-flex>
               <v-flex xs12>
-                <v-text-field label="Email*" required></v-text-field>
+                <v-text-field v-model="conditions.hashTag" label="ハッシュタグ" hint="入力例）#浮気"></v-text-field>
               </v-flex>
               <v-flex xs12>
-                <v-text-field label="Password*" type="password" required></v-text-field>
-              </v-flex>
-              <v-flex xs12 sm6>
-                <v-select :items="['0-17', '18-29', '30-54', '54+']" label="Age*" required></v-select>
-              </v-flex>
-              <v-flex xs12 sm6>
                 <v-autocomplete
-                  :items="['Skiing', 'Ice hockey', 'Soccer', 'Basketball', 'Hockey', 'Reading', 'Writing', 'Coding', 'Basejump']"
-                  label="Interests"
-                  multiple
+                  v-model="conditions.sex" 
+                  :items="['男性', '女性', 'その他']"
+                  label="投稿者の性別"
+                ></v-autocomplete>
+              </v-flex>
+              <v-flex xs12>
+                <v-autocomplete
+                  v-model="conditions.age"
+                  :items="['10代前半', '10代後半', '20代前半', '20代後半', '30代前半', '30代後半', '40代前半', '40代後半', '50代前半', '50代後半', '60代前半', '60代後半',]"
+                  label="投稿者の性別"
                 ></v-autocomplete>
               </v-flex>
             </v-layout>
           </v-container>
-          <small>*indicates required field</small>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" flat @click="dialog = false">閉じる</v-btn>
-          <v-btn color="blue darken-1" flat @click="dialog = false">検索</v-btn>
+          <v-btn color="blue darken-1" flat @click="closeDialog()">閉じる</v-btn>
+          <v-btn color="blue darken-1" flat @click="searchWithConditions()" :disabled="isNotInput()">検索</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -129,6 +126,13 @@ export default {
     return {
       dialog: false,
       search: "",
+      tmpConditions: null,
+      conditions: {
+        keyword: "",
+        hashTag: "",
+        age: "",
+        sex: ""
+      },
       pagination: {
         rowsPerPage: 14,
         descending: true,
@@ -200,7 +204,7 @@ export default {
           width: "30"
         },
         {
-          text: "グループ",
+          text: "グループ設定",
           align: "center",
           value: "name",
           sortable: false,
@@ -256,6 +260,113 @@ export default {
     this.getArticles();
   },
   methods: {
+    isNotInput(){
+      if(
+        this.conditions.keyword == "" && 
+        this.conditions.hashTag == "" && 
+        this.conditions.age == "" && 
+        this.conditions.sex == ""){
+          return true
+        }else{
+          return false
+        }
+    },
+    resetConditions(){
+      this.resetSearchForm()
+      this.getArticles()
+    },
+    resetSearchForm(){
+      this.conditions.keyword = ""
+      this.conditions.hashTag = ""
+      this.conditions.age = ""
+      this.conditions.sex = ""
+    },
+    closeDialog(){
+      this.dialog = false
+      this.resetSearchForm()
+    },
+    searchWithConditions(){
+      this.dialog = false
+      let query = ""
+      if(this.conditions.keyword != ""){ query += `&keyword=${ this.conditions.keyword.trim() }`}
+      if(this.conditions.hashTag != ""){ query += `&tag=${ this.getHashTag()}`}
+      if(this.conditions.age != ""){ query += `&age=${ this.getAgeKey() }` }
+      if(this.conditions.sex != ""){ query += `&sex=${ this.getSexKey() }`}
+      store.get_ajax_articles(`articles?limit=100000${ query }`, "posts");
+      // Json取得後に呼び出される
+      store.$on("GET_AJAX_COMPLETE_POSTS", () => {
+        this.posts = store.getPosts();
+        this.pagination.totalItems = this.posts.length - 1;
+        this.tmpConditions = this.deepCopy(this.conditions)
+      });
+    },
+    getHashTag(){
+      let hTag = ""
+      if (this.conditions.hashTag.startsWith("#")){
+        hTag = this.conditions.hashTag.slice(1)
+      }else{
+        hTag = this.conditions.hashTag
+      }
+      hTag = hTag.trim()
+      return hTag
+    },
+    getSexKey(){
+      let key = ""
+      switch(this.conditions.sex){
+        case "男性":
+          key = "m"
+          break;
+        case "女性":
+          key = "f"
+          break;
+        case "その他":
+          key = "o"
+          break;
+      }
+      return key
+    },
+    getAgeKey(){
+      let key = ""
+      switch(this.conditions.age){
+        case "10代前半":
+          key = "e_10s"
+          break;
+       case "10代後半":
+          key = "l_10s"
+          break;
+        case "20代前半":
+          key = "e_20s"
+          break;
+       case "20代後半":
+          key = "l_20s"
+          break;
+        case "30代前半":
+          key = "e_30s"
+          break;
+       case "30代後半":
+          key = "l_30s"
+          break;
+        case "40代前半":
+          key = "e_40s"
+          break;
+       case "40代後半":
+          key = "l_40s"
+          break;
+        case "50代前半":
+          key = "e_50s"
+          break;
+       case "50代後半":
+          key = "l_50s"
+          break;
+        case "60代前半":
+          key = "e_60s"
+          break;
+       case "60代後半":
+          key = "l_60s"
+          break;
+       }
+      return key
+    },
     isMatchFeatureds(id) {
       const target = store.featureds.find((p) => {return (p.id == id)});
       return (target !== undefined) 
@@ -283,12 +394,17 @@ export default {
     navigate: function(to) {
       this.$router.push(to);
     },
+    deepCopy: function(obj){
+      let copy = JSON.parse(JSON.stringify(obj));
+      return copy;
+    },
     getArticles: function(){
       store.get_ajax_articles("articles?limit=100000", "posts");
         // Json取得後に呼び出される
         store.$on("GET_AJAX_COMPLETE_POSTS", () => {
           this.posts = store.getPosts();
           this.pagination.totalItems = this.posts.length - 1;
+          this.tmpConditions = null;
         });
     },
     upArticle: function(id) {

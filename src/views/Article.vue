@@ -2,11 +2,11 @@
   <div>
     <h2>相談</h2>
     <div v-if="post">
-      <table class="comments">
+      <table>
         <tr>
-          <td><button class="btn" @click="editPost" v-bind:class="{ back: editting }"><span v-if="!editting">編集</span><span v-if="editting">編集取消</span></button></td>
-          <td><button class="btn btn-desabled" @click="updatePost" v-bind:disabled="!editting" v-bind:class="{ update: editting }">更新</button></td>
-          <td><button class="btn btn-delete" @click="deletePost">削除</button></td>
+          <td><v-btn color="primary" size="large" type="block" @click="editPost" v-bind:class="{ accent: editting }"><span v-if="!editting">編集</span><span v-if="editting">編集取消</span></v-btn></td>
+          <td><v-btn class="success" size="large" type="block" @click="updatePost" v-bind:disabled="!editting">更新</v-btn></td>
+          <td><v-btn class="error" @click="deletePost">削除</v-btn></td>
         </tr>
       </table>
       <table class="article">
@@ -21,14 +21,14 @@
           <td class="row-title">投稿者</td>
           <td colspan="2">
             性別：
-            <select v-model="post.post.user_sex" style="width:40%;" class="normal"  v-bind:class="{ disabled: !editting }" :disabled="!editting">
+            <select v-model="post.post.user_sex" style="width:40%;" v-bind:class="{ normal: editting }" :disabled="!editting">
               <option value="m">男性</option>
               <option value="f">女性</option>
               <option value="o">その他</option>
             </select>
           </td>
           <td colspan="2">年代：
-            <select v-model="post.post.user_age" style="width:40%;"  class="normal" v-bind:class="{ disabled: !editting }" :disabled="!editting">
+            <select v-model="post.post.user_age" style="width:40%;"  v-bind:class="{ normal: editting }" :disabled="!editting">
               <option value="e_10s">10代前半</option>
               <option value="l_10s">10代後半</option>
               <option value="e_20s">20代前半</option>
@@ -46,19 +46,19 @@
         </tr>
         <tr>
           <td class="row-title">選択肢</td>
-          <td colspan="2">①：<input type="text" v-model="post.post.opt1" style="width:90%;" class="normal" v-bind:class="{ disabled: !editting }" :disabled="!editting"></td>
-          <td colspan="2">②：<input type="text" v-model="post.post.opt2" style="width:90%;" class="normal" v-bind:class="{ disabled: !editting }" :disabled="!editting"></td>
+          <td colspan="2">①：<input type="text" v-model="post.post.opt1" style="width:90%;" v-bind:class="{ normal: editting }" :disabled="!editting"></td>
+          <td colspan="2">②：<input type="text" v-model="post.post.opt2" style="width:90%;" v-bind:class="{ normal: editting }" :disabled="!editting"></td>
         </tr>
         <tr>
           <td class="row-title">相談内容</td>
           <td colspan="4">
-            <textarea class="text-content normal" v-bind:class="{ disabled: !editting }" :disabled="!editting" v-model="post.post.content" style="width:100%;"></textarea>
+            <textarea class="text-content"  v-bind:class="{ normal: editting }" :disabled="!editting" v-model="post.post.content" style="width:100%;"></textarea>
           </td>
         </tr>
         <tr>
           <td class="row-title">ハッシュタグ</td>
-          <td>
-            <input type="text" v-model="newTag" class="normal" v-bind:class="{ disabled: !editting }" :disabled="!editting" style="border:1px solid black">
+          <td v-if="editting">
+            <input placeholder="#浮気" type="text" v-model="newTag" class="normal" v-bind:class="{ disabled: !editting }" :disabled="!editting" style="border:1px solid black">
             <button class="disabled" v-bind:class="{ addTag: editting }" :disabled="!editting" style="width:40px;" @click="addTag()">追加</button>
           </td>
           <td colspan="3">
@@ -67,7 +67,7 @@
                 <v-icon
                   :size="15"
                   @click="deleteTag(index)"
-                >close</v-icon></button>　{{ tag }}
+                >close</v-icon></button>　#{{ tag }}
               </div>
           </td>
         </tr>
@@ -121,10 +121,10 @@
           <td>{{ c.created_at|format_date  }}</td>
           <td>{{ getOptContent(c.selected_opt) }}</td>
           <td class="comment-content">
-            <textarea ref="txtComment" v-model="c.content" v-bind:readonly="true" style="width:100%;color:black;" class="disabled">
+            <textarea ref="txtComment" v-model="c.content" v-bind:readonly="true" style="width:100%;" class="disabled">
           </textarea></td>
           <td>{{c.user_age|translate_to_jp_age }}・{{c.user_sex|translate_to_jp_sex}}</td>
-          <td class="action"><button class="btn" ref="btnEditComment" @click="editComment(index)">編集</button></td>
+          <td class="action"><button class="btn primary" ref="btnEditComment" @click="editComment(index)">編集</button></td>
           <td class="action"><button class="btn btn-desabled" ref="btnUpdateComment" @click="updateComment(c, index)" disabled>更新</button></td>
           <td class="action"><button class="btn btn-delete" ref="btnDeleteComment" @click="deleteComment(c, index)">削除</button></td>
         </tr>
@@ -194,7 +194,13 @@ export default {
       });
     },
     addTag: function(){
-      this.post.post.tag_list.push(this.newTag)
+      let hTag = ""
+      if(this.newTag.startsWith("#") || this.newTag.startsWith("＃")){
+        hTag = this.newTag.slice(1)
+      }else{
+        hTag = this.newTag.trim()
+      }
+      this.post.post.tag_list.push(hTag)
       this.newTag = ""
     },
     deleteTag: function(index){
@@ -289,9 +295,8 @@ export default {
         this.resetEditComment()
         this.$refs.txtComment[index].readOnly = false
         this.$refs.txtComment[index].className = "normal"
-        console.log(this.$refs.btnEditComment)
         this.$refs.btnEditComment[index].innerHTML = "取消"
-        this.$refs.btnEditComment[index].className = "btn back"
+        this.$refs.btnEditComment[index].className = "btn accent"
         this.$refs.btnUpdateComment[index].disabled = false
         this.$refs.btnUpdateComment[index].className = "btn update"
       }else{
@@ -303,7 +308,7 @@ export default {
           element.value = this.tmpComments[i].content
           element.readOnly = true
           this.$refs.btnEditComment[i].innerHTML = "編集"
-          this.$refs.btnEditComment[i].className = "btn"
+          this.$refs.btnEditComment[i].className = "btn primary"
           this.$refs.txtComment[i].className = "disabled"
           this.$refs.btnUpdateComment[i].disabled = true
           this.$refs.btnUpdateComment[i].className = "btn btn-desabled"
@@ -312,14 +317,11 @@ export default {
     updateComment: function(comment, index){
       this.action = "updateComment"
       this.indexComment = index;
-      console.log(this.$refs.txtComment[index].value)
-      console.log(comment)
       this.dialog = true
     },
     deleteComment: function(comment,index){
       this.action = "deleteComment"
       this.indexComment = index;
-      console.log(comment)
       this.dialog = true
     },
     getOptContent: function(opt){
@@ -531,7 +533,7 @@ table.comments td.action{
 .btn{
   width: 100%;
   height: 100%;
-  background-color:whitesmoke;
+  background-color: whitesmoke;
   color: black;
 }
 .btn-delete{
@@ -542,10 +544,6 @@ table.comments td.action{
 }
 .normal{
   background-color:whitesmoke;
-  color:black;
-}
-.disabled{
-  background-color:gray;
   color:black;
 }
 .back{
