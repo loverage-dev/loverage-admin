@@ -163,10 +163,12 @@ export default {
     }
   },
   created() {
+    store.startLoading()
     store.get_ajax_articles("hot_topics?limit=100000", "hot_topics");
     store.$on("GET_AJAX_COMPLETE_HOT_TOPICS", () => {
       this.hot_topics = store.getHotTopics();
       this.pagination.totalItems = this.hot_topics.length - 1;
+      store.endLoading()
     });
   },
   methods: {
@@ -186,6 +188,7 @@ export default {
       })
     },
     removeArticle: function(id){
+      store.startLoading()
       store.delete_ajax_article("articles/editors_pick/", id)
       .then((res)=>{
         if(res.status == 200){
@@ -195,6 +198,9 @@ export default {
             this.pagination.totalItems = this.hot_topics.length - 1;
           });
         } 
+      })
+      .finally(()=>{
+        store.endLoading()
       })
     }
   }

@@ -162,11 +162,13 @@ export default {
       );
     }
   },
-  created() {
+  created() { 
+    store.startLoading()
     store.get_ajax_articles("featureds?limit=100000", "featureds");
     store.$on("GET_AJAX_COMPLETE_FEATUREDS", () => {
       this.featureds = store.getFeatureds();
       this.pagination.totalItems = this.featureds.length - 1;
+      store.endLoading()
     });
   },
   methods: {
@@ -186,6 +188,7 @@ export default {
       })
     },
     removeArticle: function(id){
+      store.startLoading()
       store.delete_ajax_article("articles/featured/", id)
       .then((res)=>{
         if(res.status == 200){
@@ -195,6 +198,9 @@ export default {
             this.pagination.totalItems = this.featureds.length - 1;
           })
         }
+      })
+      .finally(()=>{
+        store.endLoading()
       })
     }
   }

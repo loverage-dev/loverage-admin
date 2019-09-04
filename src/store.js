@@ -40,7 +40,15 @@ export default new Vue({
               this.$emit('GET_AJAX_COMPLETE_VISUALS');
             break;
         }
-      });
+      }).catch((error)=>{
+        alert(error)
+      })
+    },
+    startLoading(){
+      this.$emit('START_LOADING')
+    },
+    endLoading(){
+      this.$emit('END_LOADING')
     },
     get_ajax_article(url, name) {
       return axios.get(URL_BASE + url)

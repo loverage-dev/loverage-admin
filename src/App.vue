@@ -1,5 +1,6 @@
 <template>
   <v-app dark>
+    <Loading />
     <v-navigation-drawer v-model="drawer" absolute temporary>
       <v-list class="pa-1">
         <v-list-tile avatar>
@@ -62,9 +63,14 @@
 </template>
 
 <script>
+import store from "./store";
+import Loading from "./components/Loading";
+
 export default {
   name: "App",
-  components: {},
+  components: {
+    Loading
+  },
   methods:{
     navigate: function(name){
       this.$router.push({ name: name })

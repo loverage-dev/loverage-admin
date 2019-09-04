@@ -399,12 +399,14 @@ export default {
       return copy;
     },
     getArticles: function(){
+      store.startLoading()
       store.get_ajax_articles("articles?limit=100000", "posts");
         // Json取得後に呼び出される
         store.$on("GET_AJAX_COMPLETE_POSTS", () => {
           this.posts = store.getPosts();
           this.pagination.totalItems = this.posts.length - 1;
           this.tmpConditions = null;
+          store.endLoading()
         });
     },
     upArticle: function(id) {

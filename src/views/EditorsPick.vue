@@ -163,10 +163,12 @@ export default {
     }
   },
   created() {
+    store.startLoading()
     store.get_ajax_articles("editors_picks?limit=100000", "editors_picks");
     store.$on("GET_AJAX_COMPLETE_EDITORS_PICKS", () => {
       this.editors_picks = store.getEditorsPicks();
       this.pagination.totalItems = this.editors_picks.length - 1;
+      store.endLoading()
     });
   },
   methods: {
@@ -186,6 +188,7 @@ export default {
       })
     },
     removeArticle: function(id){
+      store.startLoading()
       store.delete_ajax_article("articles/editors_pick/", id)
       .then((res)=>{
         if(res.status == 200){
@@ -195,6 +198,9 @@ export default {
             this.pagination.totalItems = this.editors_picks.length - 1;
           });
         } 
+      })
+      .finally(()=>{
+        store.endLoading()
       })
     }
   }

@@ -96,12 +96,15 @@ export default{
   },
   methods: {
     fetchVisuals: function(){
+      store.startLoading()
       store.get_ajax_articles("visuals", "visuals");
       store.$on("GET_AJAX_COMPLETE_VISUALS", () => {
         this.visuals = store.getVisuals();
+        store.endLoading()
       });
     },
     update: function(){
+      store.startLoading()
       store.post_ajax_articles(`visuals/${this.tmpPost.visual_id}`, { 
             "visual": {
               "day_of_week_no": this.tmpPost.visual_day_of_week_no,
@@ -120,6 +123,7 @@ export default{
           .finally(()=>{
             this.changedId = ""
             this.dialog = false
+            store.endLoading()
           })
     },
     cancel: function(){
