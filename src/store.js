@@ -61,7 +61,6 @@ export default new Vue({
       return axios.post(URL_BASE + url, data)
     },
     delete_ajax_article(url, id){
-      console.log(URL_BASE + url + id)
       return axios.delete(URL_BASE + url + id)
     },
     getPost() {

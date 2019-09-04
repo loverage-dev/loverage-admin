@@ -39,13 +39,13 @@
           </v-avatar>
         </v-btn>
       </v-toolbar-items>
-      <v-toolbar-items class="hidden-sm-and-down">
+      <!-- <v-toolbar-items class="hidden-sm-and-down">
         <v-btn flat>
           <v-avatar :size="25" color="grey lighten-5">
             <img src="./assets/logo.png" alt="avatar">
           </v-avatar>　Go To Loverage WebSite
         </v-btn>
-      </v-toolbar-items>
+      </v-toolbar-items> -->
       <v-toolbar-items class="hidden-md-and-up">
         <v-btn flat>
           <v-avatar :size="40" color="grey lighten-5">

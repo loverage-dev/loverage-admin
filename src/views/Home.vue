@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="posts.length != 0">
     <p>
       <span><v-icon :size="15">all_inbox</v-icon></span>
       <span style="font-weight: bold;"> All Articles</span>
@@ -120,6 +120,7 @@
 
 <script>
 import store from "../store";
+import { setTimeout } from 'timers';
 export default {
   components: {},
   data() {
@@ -238,26 +239,56 @@ export default {
         this.pagination.totalItems == null
       )
         return 0;
-
       return Math.ceil(
         this.pagination.totalItems / this.pagination.rowsPerPage
       );
     }
   },
-  created() {
-    store.get_ajax_articles("featureds?limit=100000", "featureds");
-    store.$on("GET_AJAX_COMPLETE_FEATUREDS", () => {
-      this.featureds = store.getFeatureds();
+  created: function() {
+
+    var promise1 = new Promise( ( resolve, reject ) => {
+      store.get_ajax_articles("featureds?limit=100000", "featureds");
+      store.$on("GET_AJAX_COMPLETE_FEATUREDS", () => {
+        resolve();
+      });
     });
-    store.get_ajax_articles("hot_topics?limit=100000", "hot_topics");
-    store.$on("GET_AJAX_COMPLETE_HOT_TOPICS", () => {
-      this.hot_topics = store.getHotTopics();
+
+    var promise2 = new Promise( ( resolve, reject ) => {
+      store.get_ajax_articles("hot_topics?limit=100000", "hot_topics");
+      store.$on("GET_AJAX_COMPLETE_HOT_TOPICS", () => {
+        resolve();
+      });
     });
-    store.get_ajax_articles("editors_picks?limit=100000", "editors_picks");
-    store.$on("GET_AJAX_COMPLETE_EDITORS_PICKS", () => {
+
+    var promise3 = new Promise( ( resolve, reject ) => {
+      store.get_ajax_articles("editors_picks?limit=100000", "editors_picks");
+      store.$on("GET_AJAX_COMPLETE_EDITORS_PICKS", () => {
+        resolve();
+      });
+    });
+
+     var promise4 = new Promise( ( resolve, reject ) => {
+       store.get_ajax_articles("articles?limit=100000", "posts");
+        store.$on("GET_AJAX_COMPLETE_POSTS", () => {
+        resolve()
+      })
+    });
+    store.startLoading()
+    Promise.all( [ promise1, promise2, promise3,promise4 ] )
+    .then(()=>{
       this.editors_picks = store.getEditorsPicks();
-    });
-    this.getArticles();
+      this.hot_topics = store.getHotTopics();
+      this.featureds = store.getFeatureds();
+      this.posts = store.getPosts();
+      this.pagination.totalItems = this.posts.length - 1;
+
+      this.tmpConditions = null;
+    })
+    .then(()=>{
+      this.$nextTick(() => {
+        store.endLoading()
+      });  
+    })
   },
   methods: {
     isNotInput(){
@@ -272,6 +303,7 @@ export default {
         }
     },
     resetConditions(){
+      store.startLoading()
       this.resetSearchForm()
       this.getArticles()
     },
@@ -286,18 +318,22 @@ export default {
       this.resetSearchForm()
     },
     searchWithConditions(){
+
+      store.startLoading()
       this.dialog = false
       let query = ""
       if(this.conditions.keyword != ""){ query += `&keyword=${ this.conditions.keyword.trim() }`}
       if(this.conditions.hashTag != ""){ query += `&tag=${ this.getHashTag()}`}
       if(this.conditions.age != ""){ query += `&age=${ this.getAgeKey() }` }
       if(this.conditions.sex != ""){ query += `&sex=${ this.getSexKey() }`}
+      store.startLoading()
       store.get_ajax_articles(`articles?limit=100000${ query }`, "posts");
       // Json取得後に呼び出される
       store.$on("GET_AJAX_COMPLETE_POSTS", () => {
         this.posts = store.getPosts();
         this.pagination.totalItems = this.posts.length - 1;
         this.tmpConditions = this.deepCopy(this.conditions)
+        store.endLoading()
       });
     },
     getHashTag(){
@@ -399,15 +435,21 @@ export default {
       return copy;
     },
     getArticles: function(){
-      store.startLoading()
       store.get_ajax_articles("articles?limit=100000", "posts");
         // Json取得後に呼び出される
         store.$on("GET_AJAX_COMPLETE_POSTS", () => {
           this.posts = store.getPosts();
           this.pagination.totalItems = this.posts.length - 1;
           this.tmpConditions = null;
-          store.endLoading()
         });
+    },
+    beforeDestroy: function(){
+      this.post = []
+      this.featureds = []
+      this.hot_topics = []
+      this.hot_topics = []
+      this.pagination.rowsPerPage == null
+      this.pagination.totalItems == null
     },
     upArticle: function(id) {
       store.post_ajax_articles("articles/up_to_pickup", { id: id })

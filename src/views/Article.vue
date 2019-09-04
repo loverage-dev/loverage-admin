@@ -180,6 +180,7 @@ export default {
   },
   methods: {
     fetchArticle: function(){
+      store.startLoading()
       let id = this.$route.params.id
       // Json取得
       store.get_ajax_article(`articles/${ id }`, "post");
@@ -191,6 +192,7 @@ export default {
         this.setBarChartData()
         this.setPieChartData()
         this.isEditting = false
+        store.endLoading()
       });
     },
     addTag: function(){
