@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "start": "node ./bin/www",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
@@ -18,7 +19,8 @@
     "vue-chartkick": "^0.5.2",
     "vue-router": "^3.0.3",
     "vuetify": "^1.5.5",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "express": "~4.16.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.6.0",
@@ -33,5 +35,9 @@
     "vue-cli-plugin-vuetify": "^0.5.0",
     "vue-template-compiler": "^2.5.21",
     "vuetify-loader": "^1.0.5"
+  },
+  "engines": {
+    "node": "10.15.2",
+    "npm": "6.4.1"
   }
 }
