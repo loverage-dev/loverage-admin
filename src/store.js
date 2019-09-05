@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import axios from 'axios';
 
-// const URL_BASE = 'https://whispering-anchorage-57506.herokuapp.com/api/v1/';
-const URL_BASE = 'https://limitless-crag-46636.herokuapp.com/api/v1/';
+const URL_BASE = 'https://whispering-anchorage-57506.herokuapp.com/api/v1/';
+// const URL_BASE = 'https://limitless-crag-46636.herokuapp.com/api/v1/';
 // const URL_BASE = 'http://localhost:4000/api/v1/';
 
 // Vue.js のインスタンス
