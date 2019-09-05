@@ -52,7 +52,7 @@
           <v-icon
             :size="25"
             v-bind:style="[isMatchEditorsPicks(props.item.id)?{ 'color': 'yellow' }:{ '': ''}]"
-            @click="switchEditorsPick(isMatchHotTopics(props.item.id),props.item.id)"
+            @click="switchEditorsPick(isMatchEditorsPicks(props.item.id),props.item.id)"
           >favorite</v-icon>
         </td>
         <td class="text-xs-center">
