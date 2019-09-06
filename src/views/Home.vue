@@ -82,20 +82,25 @@
           <span class="headline">条件付き検索</span>
         </v-card-title>
         <v-card-text>
-          <div>検索に追加する条件を入力してください（複数条件指定可）</div>
           <v-container grid-list-md>
             <v-layout wrap>
+              <div>ID検索＞　検索対象の記事のIDを入力してください</div>
               <v-flex xs12>
-                <v-text-field v-model="conditions.keyword" label="検索ワード" hint="入力例）大学生"></v-text-field>
+                <v-text-field hint="For example, 55" type="number" v-model="targetId" label="ID" :disabled="inputConditions"></v-text-field>
+              </v-flex>
+              <div>条件検索＞　絞込み条件を入力してください（複数条件指定可）</div>
+              <v-flex xs12>
+                <v-text-field v-model="conditions.keyword" label="検索ワード" hint="入力例）大学生" :disabled="inputTargetId"></v-text-field>
               </v-flex>
               <v-flex xs12>
-                <v-text-field v-model="conditions.hashTag" label="ハッシュタグ" hint="入力例）#浮気"></v-text-field>
+                <v-text-field v-model="conditions.hashTag" label="ハッシュタグ" hint="入力例）#浮気" :disabled="inputTargetId"></v-text-field>
               </v-flex>
               <v-flex xs12>
                 <v-autocomplete
                   v-model="conditions.sex" 
                   :items="['男性', '女性', 'その他']"
                   label="投稿者の性別"
+                  :disabled="inputTargetId"
                 ></v-autocomplete>
               </v-flex>
               <v-flex xs12>
@@ -103,6 +108,7 @@
                   v-model="conditions.age"
                   :items="['10代前半', '10代後半', '20代前半', '20代後半', '30代前半', '30代後半', '40代前半', '40代後半', '50代前半', '50代後半', '60代前半', '60代後半',]"
                   label="投稿者の性別"
+                  :disabled="inputTargetId"
                 ></v-autocomplete>
               </v-flex>
             </v-layout>
@@ -111,7 +117,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" flat @click="closeDialog()">閉じる</v-btn>
-          <v-btn color="blue darken-1" flat @click="searchWithConditions()" :disabled="isNotInput()">検索</v-btn>
+          <v-btn color="blue darken-1" flat @click="searchBy()" :disabled="isNotInput()">検索</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -229,7 +235,8 @@ export default {
       posts: [],
       featureds: [],
       hot_topics: [],
-      editors_picks: []
+      editors_picks: [],
+      targetId: ""
     };
   },
   computed: {
@@ -242,6 +249,24 @@ export default {
       return Math.ceil(
         this.pagination.totalItems / this.pagination.rowsPerPage
       );
+    },
+    inputTargetId: function(){
+      if(this.targetId.trim() != ""){
+        return true
+      }else{
+        return false
+      }
+    },
+    inputConditions: function(){
+      if(
+        this.conditions.keyword != "" || 
+        this.conditions.hashTag != "" || 
+        this.conditions.age != ""|| 
+        this.conditions.sex != ""){
+        return true
+      }else{
+        return false
+      }
     }
   },
   created: function() {
@@ -296,7 +321,8 @@ export default {
         this.conditions.keyword == "" && 
         this.conditions.hashTag == "" && 
         this.conditions.age == "" && 
-        this.conditions.sex == ""){
+        this.conditions.sex == "" &&
+        this.targetId ==  ""){
           return true
         }else{
           return false
@@ -308,6 +334,7 @@ export default {
       this.getArticles()
     },
     resetSearchForm(){
+      this.targetId = ""
       this.conditions.keyword = ""
       this.conditions.hashTag = ""
       this.conditions.age = ""
@@ -316,6 +343,17 @@ export default {
     closeDialog(){
       this.dialog = false
       this.resetSearchForm()
+    },
+    searchBy(){
+      if(this.inputTargetId){
+        let id = this.targetId.trim()
+        this.resetSearchForm()
+        this.navigate({ name: 'article', params: { id: id } })
+      }
+
+      if(this.inputConditions){
+        this.searchWithConditions()
+      }
     },
     searchWithConditions(){
 
@@ -326,6 +364,7 @@ export default {
       if(this.conditions.hashTag != ""){ query += `&tag=${ this.getHashTag()}`}
       if(this.conditions.age != ""){ query += `&age=${ this.getAgeKey() }` }
       if(this.conditions.sex != ""){ query += `&sex=${ this.getSexKey() }`}
+      this.resetSearchForm()
       store.startLoading()
       store.get_ajax_articles(`articles?limit=100000${ query }`, "posts");
       // Json取得後に呼び出される
