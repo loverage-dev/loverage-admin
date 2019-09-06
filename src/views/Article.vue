@@ -7,6 +7,13 @@
           <td><v-btn color="primary" size="large" type="block" @click="editPost" v-bind:class="{ accent: editting }"><span v-if="!editting">編集</span><span v-if="editting">編集取消</span></v-btn></td>
           <td><v-btn class="success" size="large" type="block" @click="updatePost" v-bind:disabled="!editting">更新</v-btn></td>
           <td><v-btn class="error" @click="deletePost">削除</v-btn></td>
+          <td>
+            <v-btn flat @click="goToWeb">
+              <v-avatar :size="25" color="grey lighten-5">
+                <img src="../assets/logo.png" alt="avatar">
+              </v-avatar>　実際の投稿ページを確認
+            </v-btn>
+          </td>
         </tr>
       </table>
       <table class="article">
@@ -179,6 +186,10 @@ export default {
     }
   },
   methods: {
+    goToWeb: function(){
+      let url = `https://www.loverage.jp/article/${ this.$route.params.id }`
+      window.open(url, '_blank')
+    },
     fetchArticle: function(){
       store.startLoading()
       let id = this.$route.params.id
