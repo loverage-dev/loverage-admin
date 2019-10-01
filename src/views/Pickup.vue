@@ -15,6 +15,7 @@
           <td class="text-xs-left">{{ props.item.content }}</td>
           <td class="text-xs-center">{{ props.item.user_sex|translate_to_jp_sex }}</td>
           <td class="text-xs-center">{{ props.item.user_age|translate_to_jp_age }}</td>
+          <td class="text-xs-center">{{ props.item.category|category }}</td>
           <td class="text-xs-center">{{ props.item.ref_count }}</td>
           <td class="text-xs-center">{{ props.item.votes_amount }}</td>
           <td class="text-xs-center">
@@ -229,6 +230,13 @@ export default{
           align: "center",
           sortable: false,
           width: "150"
+        },
+        {
+          text: "カテゴリー",
+          value: "category",
+          align: "center",
+          sortable: false,
+          width: "80"
         },
         {
           text: "閲覧数",

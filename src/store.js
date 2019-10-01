@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import axios from 'axios';
 
-const URL_BASE = 'https://whispering-anchorage-57506.herokuapp.com/api/v1/';
+// const URL_BASE = 'https://whispering-anchorage-57506.herokuapp.com/api/v1/';
 // const URL_BASE = 'https://limitless-crag-46636.herokuapp.com/api/v1/';
-// const URL_BASE = 'http://localhost:4000/api/v1/';
+const URL_BASE = 'http://localhost:4000/api/v1/';
 
 // Vue.js のインスタンス
 export default new Vue({
@@ -56,6 +56,9 @@ export default new Vue({
         Vue.set(this, name, res.data.article);
         this.$emit('GET_AJAX_COMPLETE_POST');
       });
+    },
+    get_ajax_category_list(url){
+      return axios.get(URL_BASE + url)
     },
     post_ajax_articles(url, data){
       return axios.post(URL_BASE + url, data)

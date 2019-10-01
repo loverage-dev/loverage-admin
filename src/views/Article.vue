@@ -57,6 +57,15 @@
           <td colspan="2">②：<input type="text" v-model="post.post.opt2" style="width:90%;" v-bind:class="{ normal: editting }" :disabled="!editting"></td>
         </tr>
         <tr>
+          <td class="row-title">カテゴリー</td>
+          <td colspan="4">
+            <select v-model="post.post.category_id" style="width:40%;"  v-bind:class="{ normal: editting }" :disabled="!editting">
+              <option value="null" v-if="post.post.category_id == null">(未設定)</option>
+              <option v-bind:value="category.id" v-for="category in categoryList" v-bind:key="category.id">{{ category.name }}</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
           <td class="row-title">相談内容</td>
           <td colspan="4">
             <textarea class="text-content"  v-bind:class="{ normal: editting }" :disabled="!editting" v-model="post.post.content" style="width:100%;"></textarea>
@@ -178,6 +187,7 @@ export default {
     PieChart
   },
   mounted: function(){
+    this.fetchCategoryList()
     this.fetchArticle();
   },
   computed:{
@@ -189,6 +199,18 @@ export default {
     goToWeb: function(){
       let url = `https://www.loverage.jp/article/${ this.$route.params.id }`
       window.open(url, '_blank')
+    },
+    fetchCategoryList(){
+      //カテゴリーリスト取得
+      store.get_ajax_category_list('category_list')
+      .then((res)=>{
+        if(res.status == 200){
+          this.categoryList = res.data.categories
+        }
+      })
+      .catch((err)=>{
+        alert("カテゴリーが取得できませんでした。")
+      })
     },
     fetchArticle: function(){
       store.startLoading()
@@ -231,7 +253,8 @@ export default {
               "opt1": this.post.post.opt1,
               "opt2": this.post.post.opt2,
               "img_base64": this.post.post.img_base64,
-              "tag_list": this.post.post.tag_list
+              "tag_list": this.post.post.tag_list,
+              "category_id": this.post.post.category_id
               }
             })
           .then((res)=>{
@@ -431,6 +454,7 @@ export default {
       indexComment: 0,
       action: "",
       newTag: "",
+      categoryList: null,
       dialog: false,
       barChartData: {
         labels: [

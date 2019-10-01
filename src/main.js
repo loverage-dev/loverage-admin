@@ -36,6 +36,23 @@ Vue.filter('translate_to_jp_age', function (value) {
       return value
   }
 });
+Vue.filter('category', function (value) {
+  if(value == null){
+    return "(未設定)"
+  }else{
+    return value
+  }
+});
+Vue.filter('categoryToArray', function (value) {
+  if(value != null){
+    let arry = value.map((element, index, array) => {
+      return element.name;
+    });
+    return arry
+  }else{
+    return value
+  }
+});
 Vue.filter('translate_to_jp_age_simple', function (value) {
   switch (value) {
     case "10s":

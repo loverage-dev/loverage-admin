@@ -29,6 +29,7 @@
         <td class="text-xs-right">{{ props.item.votes_amount }}</td>
         <td class="text-xs-center">{{ props.item.user_sex|translate_to_jp_sex }}</td>
         <td class="text-xs-center">{{ props.item.user_age|translate_to_jp_age }}</td>
+        <td class="text-xs-center">{{ props.item.category|category }}</td>
         <td class="text-xs-center">
           <v-icon
             :size="25"
@@ -97,6 +98,14 @@
               </v-flex>
               <v-flex xs12>
                 <v-autocomplete
+                  v-model="conditions.category" 
+                  :items="categoryList|categoryToArray"
+                  label="カテゴリー"
+                  :disabled="inputTargetId"
+                ></v-autocomplete>
+              </v-flex>
+              <v-flex xs12>
+                <v-autocomplete
                   v-model="conditions.sex" 
                   :items="['男性', '女性', 'その他']"
                   label="投稿者の性別"
@@ -134,11 +143,13 @@ export default {
       dialog: false,
       search: "",
       tmpConditions: null,
+      categoryList: null,
       conditions: {
         keyword: "",
         hashTag: "",
         age: "",
-        sex: ""
+        sex: "",
+        category: ""
       },
       pagination: {
         rowsPerPage: 14,
@@ -205,6 +216,13 @@ export default {
           width: "110"
         },
         {
+          text: "カテゴリー",
+          value: "category",
+          align: "center",
+          sortable: false,
+          width: "140"
+        },
+        {
           text: "アゲ",
           align: "center",
           sortable: false,
@@ -262,7 +280,8 @@ export default {
         this.conditions.keyword != "" || 
         this.conditions.hashTag != "" || 
         this.conditions.age != ""|| 
-        this.conditions.sex != ""){
+        this.conditions.sex != ""||
+        this.conditions.category){
         return true
       }else{
         return false
@@ -314,14 +333,28 @@ export default {
         store.endLoading()
       });  
     })
+    this.fetchCategoryList()
   },
   methods: {
+    fetchCategoryList(){
+      //カテゴリーリスト取得
+      store.get_ajax_category_list('category_list')
+      .then((res)=>{
+        if(res.status == 200){
+          this.categoryList = res.data.categories
+        }
+      })
+      .catch((err)=>{
+        alert("カテゴリーが取得できませんでした。")
+      })
+    },
     isNotInput(){
       if(
         this.conditions.keyword == "" && 
         this.conditions.hashTag == "" && 
         this.conditions.age == "" && 
         this.conditions.sex == "" &&
+        this.conditions.category == "" && 
         this.targetId ==  ""){
           return true
         }else{
@@ -339,6 +372,7 @@ export default {
       this.conditions.hashTag = ""
       this.conditions.age = ""
       this.conditions.sex = ""
+      this.conditions.category = ""
     },
     closeDialog(){
       this.dialog = false
@@ -364,6 +398,7 @@ export default {
       if(this.conditions.hashTag != ""){ query += `&tag=${ this.getHashTag()}`}
       if(this.conditions.age != ""){ query += `&age=${ this.getAgeKey() }` }
       if(this.conditions.sex != ""){ query += `&sex=${ this.getSexKey() }`}
+      if(this.conditions.category != ""){ query += `&category=${ this.conditions.category }`}
       this.resetSearchForm()
       store.startLoading()
       store.get_ajax_articles(`articles?limit=100000${ query }`, "posts");

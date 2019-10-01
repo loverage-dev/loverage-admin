@@ -22,19 +22,20 @@
         <td class="text-xs-right">{{ props.item.votes_amount }}</td>
         <td class="text-xs-center">{{ props.item.user_sex|translate_to_jp_sex }}</td>
         <td class="text-xs-center">{{ props.item.user_age|translate_to_jp_age }}</td>
-        <td class="text-xs-center">
-          <v-icon
-            :size="25"
-            class="mr-3"
-            @click="navigate({ name: 'article', params: { id: props.item.id } })"
-          >description</v-icon>
-        </td>
+        <td class="text-xs-center">{{ props.item.category|category }}</td>
         <td class="text-xs-center">
           <v-icon
             :size="25"
             class="mr-3"
             @click="upArticle(props.item.id)"
           >arrow_upward</v-icon>
+        </td>
+        <td class="text-xs-center">
+          <v-icon
+            :size="25"
+            class="mr-3"
+            @click="navigate({ name: 'article', params: { id: props.item.id } })"
+          >description</v-icon>
         </td>
         <td class="text-xs-center">
           <v-icon
@@ -122,14 +123,21 @@ export default {
           width: "150"
         },
         {
-          text: "閲覧",
+          text: "カテゴリー",
+          value: "category",
+          align: "center",
+          sortable: false,
+          width: "80"
+        },
+        {
+          text: "アゲ",
           align: "center",
           value: "name",
           sortable: false,
           width: "100"
         },
         {
-          text: "アゲ",
+          text: "閲覧",
           align: "center",
           value: "name",
           sortable: false,
