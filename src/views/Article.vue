@@ -186,6 +186,13 @@ export default {
     BarChart,
     PieChart
   },
+  watch: {
+    // eslint-disable-next-line
+    $route: function(to, from) {
+      this.fetchCategoryList()
+      this.fetchArticle();
+    }
+  },
   mounted: function(){
     this.fetchCategoryList()
     this.fetchArticle();
