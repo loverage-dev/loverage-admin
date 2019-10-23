@@ -60,7 +60,7 @@
           <v-icon
             :size="25"
             class="mr-3"
-            @click="navigate({ name: 'article', params: { id: props.item.id } })"
+            @click="navigateTo(props.item.id)"
           >description</v-icon>
         </td>
         <!-- <td class="text-xs-center">
@@ -336,6 +336,10 @@ export default {
     this.fetchCategoryList()
   },
   methods: {
+    navigateTo: function(id) {
+      let routeData = this.$router.resolve({ name: 'article', params: { id: id } })
+      window.open(routeData.href, '_blank');
+    },
     fetchCategoryList(){
       //カテゴリーリスト取得
       store.get_ajax_category_list('category_list')
