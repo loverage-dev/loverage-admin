@@ -186,15 +186,9 @@ export default {
     BarChart,
     PieChart
   },
-  created() {
+  mounted: function(){
     this.fetchCategoryList()
-    this.fetchArticle()
-  },
-  watch: {
-    $route: function(to, from) {
-      this.fetchCategoryList()
-      this.fetchArticle();
-    }
+    this.fetchArticle();
   },
   computed:{
     editting: function(){
